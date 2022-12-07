@@ -8,7 +8,34 @@ namespace AdventOfCode2022
         {
             Console.ForegroundColor = ConsoleColor.Magenta;
 
-            DayFourResults();
+        }
+
+        static void DaySixResults()
+        {
+            string input = Day6.DaySixTask.GetDay6Input();
+
+            Console.WriteLine($"Day 6: Result of the first task = {Day6.DaySixTask.RunDay6TaskFirstPart(input)}");
+            Console.WriteLine($"Day 6: Result of the second task = {Day6.DaySixTask.RunDay6TaskSecondPart(input)}");
+
+        }
+
+        //Refactor
+        static void DayFiveResults()
+        {
+            var instructions = Day5.DataParser.GetInstructions();
+            var structureInput = Day5.DataParser.GetStructureInput();
+            var structureList = Day5.DataParser.ParseInputReturnListOfStacks(structureInput);
+
+            foreach (var row in instructions)
+            {
+                int[] instructionsArr = Day5.DataParser.ParseInstructions(row);
+                Day5.CargoMover.MoveItemByInstructionSecond(instructionsArr[0], instructionsArr[1] - 1, instructionsArr[2] - 1, structureList);
+            }
+
+            foreach (var stack in structureList)
+            {
+                Console.Write(stack?.Peek());
+            }
         }
 
         static void DayFourResults()
