@@ -25,8 +25,9 @@ namespace AdventOfCode2022
             string[] input = Day2.Game.GetInput();
 
             int res1 = Day2.Game.GetFirstTaskResult(input);
+            int res2 = Day2.Game.GetSecondTaskResult(input);
 
-            Helper.DisplayResultsOnConsole(2, res1, 0);
+            Helper.DisplayResultsOnConsole(2, res1, res2);
         }
     }
 }

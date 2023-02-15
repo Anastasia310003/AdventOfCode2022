@@ -23,18 +23,18 @@ namespace AdventOfCode2022Tests.Day2Tests
         [TestCase('A', 'G')]
         [TestCase('T', 'Y')]
         [TestCase('K', 'M')]
-        public void CalculateWinner_ReturnsArgumentException(char first, char second)
+        public void CalculateWinner_ReturnsArgumentException(char opponentChoice, char myChoice)
         {
-            Assert.Throws<ArgumentException>(() => { Game.CalculateWinner(first, second); });
+            Assert.Throws<ArgumentException>(() => { Game.CalculateWinner(opponentChoice, myChoice); });
         }
 
         [Test]
         [TestCase('A', 'X')]
         [TestCase('B', 'Y')]
         [TestCase('C', 'Z')]
-        public void CalculateWinner_ReturnsDraw(char first, char second)
+        public void CalculateWinner_ReturnsDraw(char opponentChoice, char myChoice)
         {
-            int gameRes = Game.CalculateWinner(first, second);
+            int gameRes = Game.CalculateWinner(opponentChoice, myChoice);
 
             Assert.AreEqual(gameRes, 0);
         }
@@ -43,30 +43,40 @@ namespace AdventOfCode2022Tests.Day2Tests
         [TestCase('A', 'Z')]
         [TestCase('B', 'X')]
         [TestCase('C', 'Y')]
-        public void CalculateWinner_ReturnsFirstWin(char first, char second)
+        public void CalculateWinner_ReturnsOpponentWin(char opponentChoice, char myChoice)
         {
-            int gameRes = Game.CalculateWinner(first, second);
+            int gameRes = Game.CalculateWinner(opponentChoice, myChoice);
 
-            Assert.AreEqual(gameRes, 1);
+            Assert.AreEqual(gameRes, 2);
         }
 
         [Test]
         [TestCase('A', 'Y')]
         [TestCase('B', 'Z')]
         [TestCase('C', 'X')]
-        public void CalculateWinner_ReturnsSecondWin(char first, char second)
+        public void CalculateWinner_ReturnsIWin(char opponentChoice, char myChoice)
         {
-            int gameRes = Game.CalculateWinner(first, second);
+            int gameRes = Game.CalculateWinner(opponentChoice, myChoice);
 
-            Assert.AreEqual(gameRes, 2);
+            Assert.AreEqual(gameRes, 1);
         }
 
         [Test]
-        public void GetFirstTaskResult_ReturnsTotalScore_FirstPlayer()
+        public void GetFirstTaskResult_ReturnsMyTotalScore()
         {
             int totalExpectedScore = 15;
 
             int resultScore = Game.GetFirstTaskResult(inputLines);
+
+            Assert.AreEqual(totalExpectedScore, resultScore);
+        }
+
+        [Test]
+        public void GetSecondTaskResult_ReturnsMyTotalScore()
+        {
+            int totalExpectedScore = 12;
+
+            int resultScore = Game.GetSecondTaskResult(inputLines);
 
             Assert.AreEqual(totalExpectedScore, resultScore);
         }

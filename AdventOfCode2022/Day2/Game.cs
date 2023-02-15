@@ -7,12 +7,13 @@ namespace AdventOfCode2022.Day2
 {
     public static class Game
     {
-        private static readonly char rock1 = 'A', rock2 = 'X';
-        private static readonly char paper1 = 'B', paper2 = 'Y';
-        private static readonly char scissors1 = 'C', scissors2 = 'Z';
-        private static readonly int draw = 0, firstWon = 1, secondWon = 2;
-        private static readonly List<char> _allowedInputsFirst = new List<char>() { rock1 , paper1, scissors1};
-        private static readonly List<char> _allowedInputsSecond = new List<char>() {rock2, paper2, scissors2};
+        private static readonly char _oppRock = 'A', _myRock = 'X';
+        private static readonly char _oppPaper = 'B', _myPaper = 'Y';
+        private static readonly char _oppScissors = 'C', _myScissors = 'Z';
+        private static readonly int _draw = 0, _iWon = 1, _iLost = 2;
+        private static readonly char _endDraw = 'Y', _endWin = 'Z', _endLose = 'X';
+        private static readonly List<char> _allowedInputsOpponent = new List<char>() { _oppRock , _oppPaper, _oppScissors};
+        private static readonly List<char> _allowedInputsMe = new List<char>() {_myRock, _myPaper, _myScissors};
 
         public static string[] GetInput()
         {
@@ -33,7 +34,26 @@ namespace AdventOfCode2022.Day2
                 int gameResult = CalculateWinner(round[0], round[2]);
 
                 totalPoints += CalculateWinPoints(gameResult);
-                totalPoints += CalculateChoicePoints(round[0]);
+                totalPoints += CalculateChoicePoints(round[2]);
+            }
+
+            return totalPoints;
+        }
+
+        public static int GetSecondTaskResult(string[] input)
+        {
+            int totalPoints = 0;
+
+            foreach (string round in input)
+            {
+                if (input.Length < 3)
+                    throw new ArgumentException($"Day2.Game.CalculateGamePointsForFirstPlayer -> Invalid argument(s) passed. String row: {round}.");
+
+                char myChoice = FollowInstruction(round[2], round[0]);
+                int gameResult = CalculateWinner(round[0], myChoice);
+
+                totalPoints += CalculateWinPoints(gameResult);
+                totalPoints += CalculateChoicePoints(myChoice);
             }
 
             return totalPoints;
@@ -42,57 +62,130 @@ namespace AdventOfCode2022.Day2
         /// <summary>
         /// Calculates the winner on rock-paper-scissors game
         /// </summary>
-        /// <param name="first">first player choice</param>
-        /// <param name="second">second player choice</param>
-        /// <returns>0 - if draw, 1 - first player wins, 2 - second player wins, -1 if something terible happens and one of the flows was not considered</returns>
+        /// <param name="opponentChoice">opponent choice</param>
+        /// <param name="myChoice">my choice</param>
+        /// <returns>0 - if draw, 1 - opponent wins, 2 - I win</returns>
         /// <exception cref="ArgumentException">throws Argument exeption if arguments are invalid</exception>
-        public static int CalculateWinner(char first, char second)
+        /// <exception cref="Exception">throws Exeption if none of the valid flows work</exception>
+        public static int CalculateWinner(char opponentChoice, char myChoice)
         {
-            if (!InputValid(first, second))
-                throw new ArgumentException($"Day2.Game.CalculateWinner -> Invalid argument(s) passed. Values: {first}, {second}.");
+            if (!InputValid(opponentChoice, myChoice))
+                throw new ArgumentException($"Day2.Game.CalculateWinner -> Invalid argument(s) passed. Values: {opponentChoice}, {myChoice}.");
 
             //Draw
-            if (first == rock1 && second == rock2 || first == paper1 && second == paper2
-                || first == scissors1 && second == scissors2)
-                return draw;
+            if (opponentChoice == _oppRock && myChoice == _myRock || opponentChoice == _oppPaper && myChoice == _myPaper
+                || opponentChoice == _oppScissors && myChoice == _myScissors)
+                return _draw;
 
-            //First wins
-            if (first == rock1 && second == scissors2 || first == paper1 && second == rock2
-                || first == scissors1 && second == paper2)
-                return firstWon;
+            //Opponent wins
+            if (opponentChoice == _oppRock && myChoice == _myScissors || opponentChoice == _oppPaper && myChoice == _myRock
+                || opponentChoice == _oppScissors && myChoice == _myPaper)
+                return _iLost;
 
-            //Second wins
-            if (first == rock1 && second == paper2 || first == paper1 && second == scissors2
-                || first == scissors1 && second == rock2)
-                return secondWon;
+            //I win
+            if (opponentChoice == _oppRock && myChoice == _myPaper || opponentChoice == _oppPaper && myChoice == _myScissors
+                || opponentChoice == _oppScissors && myChoice == _myRock)
+                return _iWon;
 
-            return -1;
+            throw new Exception($"Day2.Game.CalculateWinner -> The flow was broken. Argument values:{opponentChoice}, {myChoice}.");
         }
 
-        private static int CalculateChoicePoints(char first)
+        private static int CalculateChoicePoints(char myChoice)
         {
-            if (first == rock1)
+            if (myChoice == _myRock)
                 return 1;
-            else if (first == paper1)
+            else if (myChoice == _myPaper)
                 return 2;
-            else if (first == scissors1)
+            else if (myChoice == _myScissors)
                 return 3;
             else
-                return 0;
+                throw new ArgumentException($"Day2.Game.CalculateChoicePoints -> Invalid argument(s) passed. Values: {myChoice}.");
         }
 
         private static int CalculateWinPoints(int gameResult)
         {
-            if (gameResult == draw) return 3;
+            if (gameResult == _draw) return 3;
 
-            else if (gameResult == firstWon) return 6;
+            else if (gameResult == _iWon) return 6;
 
-            else return 0;
+            else if (gameResult == _iLost) return 0;
+
+            else
+                throw new Exception($"Day2.Game.CalculateWinPoints -> The flow was broken. Game result value:{gameResult}.");
         }
 
-        private static bool InputValid(char first, char second)
+        private static bool InputValid(char opponentChoice, char myChoice)
         {
-            return _allowedInputsFirst.Contains(first) && _allowedInputsSecond.Contains(second);
+            return _allowedInputsOpponent.Contains(opponentChoice) && _allowedInputsMe.Contains(myChoice);
+        }
+
+        /// <summary>
+        /// Gets my choice in order to follow the instruction and based on opponent choice.
+        /// </summary>
+        /// <param name="insctruction">X means you need to lose, Y means you need to end the round in a draw, and Z means you need to win.</param>
+        /// <param name="opponentChoice">Opponent choice</param>
+        /// <returns>My choice</returns>
+        /// <exception cref="Exception">Throws exception if the flow is broken</exception>
+        private static char FollowInstruction(char insctruction, char opponentChoice)
+        {
+            if(insctruction == _endDraw)
+            {
+                return GetDrawResult(opponentChoice);
+            }
+
+            if (insctruction == _endWin)
+            {
+                return GetWinResult(opponentChoice);
+            }
+
+            if (insctruction == _endLose)
+            {
+                return GetLoseResult(opponentChoice);
+            }
+
+            throw new Exception($"Day2.Game.FollowInstruction -> The flow was broken. Instruction:{insctruction}, opponent choice: {opponentChoice}");
+        }
+
+        private static char GetWinResult(char opponentChoice)
+        {
+            if (opponentChoice == _oppRock)
+                return _myPaper;
+
+            if (opponentChoice == _oppPaper)
+                return _myScissors;
+
+            if (opponentChoice == _oppScissors)
+                return _myRock;
+
+            throw new Exception($"Day2.Game.GetDrawResult -> The flow was broken. Opponent choice value:{opponentChoice}.");
+        }
+
+        private static char GetDrawResult(char opponentChoice)
+        {
+            if (opponentChoice == _oppRock)
+                return _myRock;
+
+            if (opponentChoice == _oppPaper)
+                return _myPaper;
+
+            if (opponentChoice == _oppScissors)
+                return _myScissors;
+
+            throw new Exception($"Day2.Game.GetDrawResult -> The flow was broken. Opponent choice value:{opponentChoice}.");
+        }
+
+        private static char GetLoseResult(char opponentChoice)
+        {
+            if (opponentChoice == _oppRock)
+                return _myScissors;
+
+            if (opponentChoice == _oppPaper)
+                return _myRock;
+
+            if (opponentChoice == _oppScissors)
+                return _myPaper;
+
+            throw new Exception($"Day2.Game.GetDrawResult -> The flow was broken. Opponent choice value:{opponentChoice}.");
         }
     }
 }
